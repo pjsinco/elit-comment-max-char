@@ -10,7 +10,6 @@ if ( ! defined('WPINC') ) {
 }
 
 function elit_comment_max_char_settings_init() {
-  register_setting( 'discussion', 'elit_comment_max_char' );
 
   add_settings_section(
     'elit_comment_max_char_settings_section',
@@ -20,12 +19,23 @@ function elit_comment_max_char_settings_init() {
   );
 
   add_settings_field(
-    'elit_comment_max_char_settings_field',
-    'Maximum Characters',
-    'elit_comment_max_char_settings_field_cb',
+    'comment_max_char',
+    'Maximum',
+    'elit_comment_max_char_settings_field_max_cb',
     'discussion',
     'elit_comment_max_char_settings_section'
   );
+
+  add_settings_field(
+    'comment_warn_char',
+    'Warn When User Reaches',
+    'elit_comment_max_char_settings_field_warn_cb',
+    'discussion',
+    'elit_comment_max_char_settings_section'
+  );
+
+  register_setting( 'discussion', 'comment_max_char' );
+  register_setting( 'discussion', 'comment_warn_char' );
 }
 add_action('admin_init' , 'elit_comment_max_char_settings_init');
 
@@ -33,28 +43,28 @@ function elit_comment_max_char_settings_section_cb() {
   echo '<p>Limit the number of characters in a comment</p>';
 }
 
-function elit_comment_max_char_settings_field_cb() {
-  $setting = get_option( 'elit_comment_max_char' );
+function elit_comment_max_char_settings_field_max_cb( $args ) {
+  $setting = get_option( 'comment_max_char' );
 ?>
-  <input type="text" name="elit_comment_max_char" value="<?php echo isset( $setting ) ? esc_attr( $setting ) : ''; ?>">
+  <input type="text" id="comment_max_char" name="comment_max_char" value="<?php echo isset( $setting ) ? esc_attr( $setting ) : ''; ?>">
+  <label for="comment_max_char">characters</label>
   <?php 
+}
+
+function elit_comment_max_char_settings_field_warn_cb( $args ) {
+  $setting = get_option( 'comment_warn_char' );
+?>
+  <input type="text" name="comment_warn_char" value="<?php echo isset( $setting ) ? esc_attr( $setting ) : ''; ?>">
+  <label for="comment_warn_char">characters</label>
+  <?php 
+
 }
 
 function elit_comment_max_char_enqueue_scripts() {
   if (! is_single() || ! comments_open() ) { return; }
 
-  $css_file = 'elit-comment-char-max.css';
-  $css_path = "public/styles/$css_file";
   $js_file = 'elit-comment-char-max.min.js';
   $js_path = "public/scripts/$js_file";
-
-  wp_enqueue_style(
-    'elit-comment-max-char-styles',
-    plugins_url( $css_path, __FILE__ ),
-    array(),
-    filemtime( plugin_dir_path( __FILE__ ) . '/' . $css_path ),
-    'all'
-  );
 
   wp_enqueue_script(
     'elit-comment-max-char-script',
@@ -67,7 +77,10 @@ function elit_comment_max_char_enqueue_scripts() {
   wp_localize_script( 
     'elit-comment-max-char-script', 
     'commentMaxChar', 
-    array( 'max' => get_option( 'elit_comment_max_char' ) )
+    array( 
+      'max' => get_option( 'comment_max_char' ),
+      'warn' => get_option( 'comment_warn_char' ),
+    )
   );
 
 }
