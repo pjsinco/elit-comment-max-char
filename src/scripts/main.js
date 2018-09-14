@@ -1,6 +1,4 @@
 jQuery(document).ready(function() {
-
-
   /**
    * Limit characters in a comment
    *
@@ -11,7 +9,7 @@ jQuery(document).ready(function() {
     if (charLen < charWarning) { return; }
 
     var charLimit = +window.commentMaxChar.max || 1500;
-    var charWarning = charLimit - 50;
+    var charWarning = +window.commentMaxChar.warn || charLimit - 50;
     var charsLeft = Math.max(charLimit - charLen, 0);
     var charsLeftStr = charsLeft + (charsLeft === 1 ? ' character' : ' characters');
     var validChars = evt.target.value.substr(0, charLimit);
