@@ -34,16 +34,26 @@ function elit_comment_max_char_settings_init() {
     'elit_comment_max_char_settings_section'
   );
 
+  add_settings_field(
+    'comment_limit_exempt',
+    'Exemptions',
+    'elit_comment_max_char_settings_field_exempt_cb',
+    'discussion',
+    'elit_comment_max_char_settings_section'
+  );
+
+
   register_setting( 'discussion', 'comment_max_char' );
   register_setting( 'discussion', 'comment_warn_char' );
+  register_setting( 'discussion', 'comment_limit_exempt' );
 }
 add_action('admin_init' , 'elit_comment_max_char_settings_init');
 
 function elit_comment_max_char_settings_section_cb() {
-  echo '<p>Limit the number of characters in a comment</p>';
+  echo '<p>Limit the number of characters in a comment.</p>';
 }
 
-function elit_comment_max_char_settings_field_max_cb( $args ) {
+function elit_comment_max_char_settings_field_max_cb() {
   $setting = get_option( 'comment_max_char' );
 ?>
   <input type="text" id="comment_max_char" name="comment_max_char" value="<?php echo isset( $setting ) ? esc_attr( $setting ) : ''; ?>">
@@ -51,7 +61,7 @@ function elit_comment_max_char_settings_field_max_cb( $args ) {
   <?php 
 }
 
-function elit_comment_max_char_settings_field_warn_cb( $args ) {
+function elit_comment_max_char_settings_field_warn_cb() {
   $setting = get_option( 'comment_warn_char' );
 ?>
   <input type="text" name="comment_warn_char" value="<?php echo isset( $setting ) ? esc_attr( $setting ) : ''; ?>">
@@ -60,8 +70,22 @@ function elit_comment_max_char_settings_field_warn_cb( $args ) {
 
 }
 
+function elit_comment_max_char_settings_field_exempt_cb() {
+  $setting = get_option( 'comment_limit_exempt' );
+?>
+  <input type="checkbox" id="comment_limit_exempt" name="comment_limit_exempt" value="1" <?php checked(1, $setting, true); ?>>
+  <label for="comment_limit_exempt">Does not apply to administrators, editors or authors</label>
+<?php 
+}
+
 function elit_comment_max_char_enqueue_scripts() {
-  if (! is_single() || ! comments_open() ) { return; }
+  if ( ! is_single() || ! comments_open() ) {
+    return; 
+  }
+
+  if ( get_option( 'comment_limit_exempt' ) && current_user_can( 'edit_posts' ) ) {
+    return;
+  }
 
   $js_file = 'elit-comment-char-max.min.js';
   $js_path = "public/scripts/$js_file";
