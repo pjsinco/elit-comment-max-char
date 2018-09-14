@@ -1,0 +1,21 @@
+.comment-warning {
+  display: block;
+  position: relative;
+  top: -10px;
+  clear: both;
+  text-align: right;
+  color: #ef3f23;
+  animation: fade-in-down 0.15s ease-out; }
+
+.warning {
+  color: #ef3f23; }
+
+@keyframes fade-in-down {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -35%, 0); }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0); } }
+
+/*# sourceMappingURL=elit-comment-char-max.css.map */
